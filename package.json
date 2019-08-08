@@ -1,0 +1,22 @@
+{
+  "name": "respec-github-apis",
+  "version": "1.0.0",
+  "description": "GitHub API routes for respec to be used at respec.org",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -d",
+    "clean": "rm -rf *.js *.d.ts",
+    "dev": "tsc -w",
+    "prepare": "npm run clean && npm run build"
+  },
+  "keywords": ["respec"],
+  "author": "Sid Vishnoi <sidvishnoi8@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.0",
+    "typescript": "^3.5.3"
+  }
+}

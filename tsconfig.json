@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "esModuleInterop": true,
+    "removeComments": false,
+    "strict": true,
+    "newLine": "LF",
+    "allowSyntheticDefaultImports": true
+  }
+}
