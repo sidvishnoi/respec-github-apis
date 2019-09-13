@@ -14,16 +14,14 @@ export const cache = new TTLCache<string, User>(CACHE_TTL);
  * @param logins user login names
  */
 export async function getUsersDetails(logins: string[]) {
-  const results = logins.reduce(
-    (resultsFromCache, login) => {
-      const cached = cache.get(login);
-      if (cached !== null) {
-        resultsFromCache[login] = cached;
-      }
-      return resultsFromCache;
-    },
-    Object.create(null) as { [login: string]: User },
-  );
+  const results: { [login: string]: User } = Object.create(null);
+
+  for (const login of logins) {
+    const cached = cache.get(login);
+    if (cached !== null) {
+      results[login] = cached;
+    }
+  }
 
   const loginsToFetch = logins.filter(login => !cache.get(login));
   const query = createQuery(loginsToFetch);
