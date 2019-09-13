@@ -24,6 +24,10 @@ export async function getUsersDetails(logins: string[]) {
   }
 
   const loginsToFetch = logins.filter(login => !cache.get(login));
+  if (!loginsToFetch.length) {
+    return results;
+  }
+
   const query = createQuery(loginsToFetch);
   const data: { [login: string]: User } = await requestData(query);
   for (const user of Object.values(data)) {
