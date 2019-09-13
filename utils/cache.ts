@@ -44,14 +44,14 @@ export class TTLCache<K, V> {
   }
 
   get(key: K, stale?: boolean) {
-    if (!this.cache.has(key)) return null;
+    if (!this.cache.has(key)) return;
     const { time, value } = this.cache.get(key) as CacheEntry<V>;
-    if (this.isBusted(time) && !stale) return null;
+    if (this.isBusted(time) && !stale) return;
     return value;
   }
 
   has(key: K, stale?: boolean) {
-    return this.get(key, stale) !== null;
+    return this.get(key, stale) !== undefined;
   }
 
   invalidate() {
@@ -103,7 +103,7 @@ export class TTLCacheWithStats<K, V> extends TTLCache<K, V> {
 
   get(key: K, stale?: boolean) {
     const value = super.get(key, stale);
-    if (value !== null) {
+    if (value !== undefined) {
       this._stats.hit++;
     } else {
       this._stats.miss++;

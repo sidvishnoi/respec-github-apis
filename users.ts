@@ -18,7 +18,7 @@ export async function getUsersDetails(logins: string[]) {
 
   for (const login of logins) {
     const cached = cache.get(login);
-    if (cached !== null) {
+    if (cached !== undefined) {
       results[login] = cached;
     }
   }

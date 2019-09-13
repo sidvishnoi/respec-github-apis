@@ -42,7 +42,7 @@ const getEndpoint = (owner: string, repo: string) =>
 export async function* getIssueCommentors(owner: string, repo: string) {
   const cacheKey = `${owner}-${repo}`;
   const cached = cache.get(cacheKey);
-  if (cached !== null) {
+  if (cached !== undefined) {
     yield* cached;
     return;
   }

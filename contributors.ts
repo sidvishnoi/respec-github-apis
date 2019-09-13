@@ -22,7 +22,7 @@ const getAPIURL = (owner: string, repo: string) =>
 export async function* getContributors(owner: string, repo: string) {
   const cacheKey = `${owner}-${repo}`;
   const resultFromCache = cache.get(cacheKey);
-  if (resultFromCache !== null) {
+  if (resultFromCache !== undefined) {
     yield* resultFromCache;
     return;
   }
