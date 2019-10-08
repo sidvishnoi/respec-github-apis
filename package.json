@@ -5,17 +5,25 @@
   "scripts": {
     "build": "tsc -d",
     "clean": "rm -rf *.js *.d.ts",
-    "dev": "tsc -w",
-    "prepare": "npm run clean && npm run build"
+    "dev": "tsc -w"
   },
-  "keywords": ["respec"],
-  "author": "Sid Vishnoi <sidvishnoi8@gmail.com>",
-  "license": "MIT",
   "dependencies": {
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.5.0",
     "typescript": "^3.5.3"
+  },
+  "keywords": [
+    "respec",
+    "github-api"
+  ],
+  "author": "Sid Vishnoi <sidvishnoi8@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/sidvishnoi/respec-github-apis",
+  "repository": "github:sidvishnoi/respec-github-apis",
+  "bugs": {
+    "url": "https://github.com/sidvishnoi/respec-github-apis/issues",
+    "email": "sidvishnoi8@gmail.com"
   }
 }
