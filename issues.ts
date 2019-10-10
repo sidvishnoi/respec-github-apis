@@ -96,5 +96,3 @@ function antiAlias(id: string) {
 function createCacheKey(owner: string, name: string, issue: number) {
   return `${owner}/${name}/${issue}`;
 }
-
-getIssues('w3c', 'respec', [2530, 2531]).then(console.log);
