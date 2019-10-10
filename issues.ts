@@ -47,6 +47,10 @@ export async function getIssues(owner: string, name: string, issues: number[]) {
 
   const query = createQuery(issuesToFetch);
   const response: GraphQLResponse = await requestData(query, { owner, name });
+  if (!response.repository) {
+    return null;
+  }
+
   for (const [id, details] of Object.entries(response.repository)) {
     const issueNumber = antiAlias(id);
     if (!details) {
