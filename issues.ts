@@ -9,16 +9,18 @@ interface GraphQLResponse {
     [issue: string]: {
       title: string;
       state: IssueState;
+      bodyHTML: string;
       labels: {
         nodes: Label[];
       };
-    } | null;
+    };
   };
 }
 
 export interface Issue {
   title: string;
   state: IssueState;
+  bodyHTML: string;
   labels: Label[];
 }
 
@@ -78,6 +80,7 @@ function createQuery(issues: number[]) {
     fragment issue on Issue {
       title
       state
+      bodyHTML
       labels(first: 10) {
         nodes {
           name
