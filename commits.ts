@@ -53,19 +53,15 @@ export async function* getCommits(org: string, repo: string, ref: string) {
   const cacheKey = `${org}/${repo}@${ref}`;
   const cached = cache.get(cacheKey);
 
-  // immediately send out cached items
-  if (cached) {
-    yield* cached.commits;
-  }
-
-  const since = cached ? cached.since : await getSinceDate(org, repo, ref);
-
-  const newCacheEntry = {
-    since: '',
-    // push array instead of each element as an optimization
-    commits: cached ? [cached.commits] : [],
+  const { since, commits } = cached || {
+    since: await getSinceDate(org, repo, ref),
+    commits: [],
   };
 
+  // immediately send out cached items
+  yield* commits;
+
+  const newCacheEntry = { since: '', commits: [commits] };
   let cursor: string | undefined;
   do {
     const data = await getCommitsSince(org, repo, since, cursor);
@@ -74,6 +70,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
 
     // to update cache
     if (data.commits && data.commits.length) {
+      // push array instead of each element as an optimization
       newCacheEntry.commits.push(data.commits);
       if (newCacheEntry.since === '') {
         const HEAD = data.commits[0];
