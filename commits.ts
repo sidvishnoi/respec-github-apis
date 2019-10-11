@@ -61,7 +61,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
   // immediately send out cached items
   yield* commits;
 
-  const newCacheEntry = { since: '', commits: [commits] };
+  const newCacheEntry = { since: '', commits };
   let cursor: string | undefined;
   do {
     const data = await getCommitsSince(org, repo, since, cursor);
@@ -70,8 +70,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
 
     // to update cache
     if (data.commits && data.commits.length) {
-      // push array instead of each element as an optimization
-      newCacheEntry.commits.push(data.commits);
+      newCacheEntry.commits.push(...data.commits);
       if (newCacheEntry.since === '') {
         const HEAD = data.commits[0];
         newCacheEntry.since = HEAD.committedDate;
@@ -81,10 +80,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
 
   const hasNewData = !cached || newCacheEntry.since !== cached.since;
   if (hasNewData && newCacheEntry.since !== '') {
-    cache.set(cacheKey, {
-      since: newCacheEntry.since,
-      commits: newCacheEntry.commits.flat(),
-    });
+    cache.set(cacheKey, newCacheEntry);
     await cache.dump();
   }
 }
