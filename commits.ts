@@ -1,4 +1,5 @@
 import { requestData } from './utils/graphql.js';
+import { TTLCache } from './utils/cache.js';
 
 export interface Commit {
   messageHeadline: string;
@@ -21,6 +22,19 @@ interface HistoryResponse {
   };
 }
 
+interface CacheEntry {
+  commits: Commit[];
+  since: string;
+}
+// Stale data is not written to file on dump().
+// This prevents cache file getting too large (on disk as well as memory)
+const TTL = 15 * 24 * 60 * 60 * 1000; // 15 days
+const _persistentCachePromise = new TTLCache<string, CacheEntry>(
+  TTL,
+  undefined,
+  'gh/commits',
+).load();
+
 /**
  * Get commits since given commitish
  * @param org repository owner/organization
@@ -34,13 +48,48 @@ interface HistoryResponse {
  * ```
  */
 export async function* getCommits(org: string, repo: string, ref: string) {
-  const since = await getSinceDate(org, repo, ref);
+  const cache = await _persistentCachePromise;
+
+  const cacheKey = `${org}/${repo}@${ref}`;
+  const cached = cache.get(cacheKey);
+
+  // immediately send out cached items
+  if (cached) {
+    yield* cached.commits;
+  }
+
+  const since = cached ? cached.since : await getSinceDate(org, repo, ref);
+
+  const newCacheEntry = {
+    since: '',
+    // push array instead of each element as an optimization
+    commits: cached ? [cached.commits] : [],
+  };
+
   let cursor: string | undefined;
   do {
     const data = await getCommitsSince(org, repo, since, cursor);
     yield* data.commits;
     cursor = data.cursor;
+
+    // to update cache
+    if (data.commits && data.commits.length) {
+      newCacheEntry.commits.push(data.commits);
+      if (newCacheEntry.since === '') {
+        const HEAD = data.commits[0];
+        newCacheEntry.since = HEAD.committedDate;
+      }
+    }
   } while (!!cursor);
+
+  const hasNewData = !cached || newCacheEntry.since !== cached.since;
+  if (hasNewData && newCacheEntry.since !== '') {
+    cache.set(cacheKey, {
+      since: newCacheEntry.since,
+      commits: newCacheEntry.commits.flat(),
+    });
+    await cache.dump();
+  }
 }
 
 async function getSinceDate(org: string, repo: string, ref: string) {
