@@ -22,7 +22,7 @@ interface HistoryResponse {
 }
 
 /**
- * Get commits since (inclusive) given commitish
+ * Get commits since given commitish
  * @param org repository owner/organization
  * @param repo repository name
  * @param ref commitish
@@ -110,9 +110,11 @@ async function getCommitsSince(
   const data = await requestData(query, { org, repo, since, cursor });
 
   const { repository }: HistoryResponse = data;
-  const { nodes, pageInfo } = repository.object.history;
+  const { nodes: commits, pageInfo } = repository.object.history;
+  // skip the commit referencing "ref" (on last page)
+  if (!pageInfo.hasNextPage) commits.pop();
   return {
-    commits: nodes,
+    commits,
     cursor: pageInfo.hasNextPage ? pageInfo.endCursor : undefined,
   };
 }
