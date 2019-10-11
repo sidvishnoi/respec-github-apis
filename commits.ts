@@ -1,10 +1,5 @@
 import { requestData } from './utils/graphql.js';
 
-function gql(strs: TemplateStringsArray, ...keys: any[]) {
-  const l = strs.length - 1;
-  return strs.slice(0, l).reduce((p, s, i) => p + s + keys[i], '') + strs[l];
-}
-
 export interface Commit {
   messageHeadline: string;
   abbreviatedOid: string;
@@ -27,10 +22,10 @@ interface HistoryResponse {
 }
 
 /**
- * Get commits since a commitish
- * @param org Repository owner/organization
- * @param repo Repository name
- * @param ref get commits from this commitish, inclusive
+ * Get commits since (inclusive) given commitish
+ * @param org repository owner/organization
+ * @param repo repository name
+ * @param ref commitish
  * @example
  * ```
  * for await (const commit of getCommits('w3c', 'respec', 'HEAD~5')) {
@@ -49,7 +44,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
 }
 
 async function getSinceDate(org: string, repo: string, ref: string) {
-  const query = gql`
+  const query = `
     query($org: String!, $repo: String!, $ref: String!) {
       repository(owner: $org, name: $repo) {
         object(expression: $ref) {
@@ -79,7 +74,7 @@ async function getCommitsSince(
   since: string,
   cursor?: string,
 ) {
-  const query = gql`
+  const query = `
     query(
       $org: String!
       $repo: String!
