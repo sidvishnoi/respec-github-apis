@@ -1,5 +1,8 @@
 *.ts
 !*.d.ts
-package-lock.json
+.github
+.prettierrc
 .vscode
+data
+package-lock.json
 tsconfig.json
