@@ -105,9 +105,13 @@ async function getSinceDate(org: string, repo: string, ref: string) {
   const data = await requestData(query, { org, repo, ref });
   const repository: HistoryResponse['repository'] | null = data.repository;
   if (repository === null) {
-    throw new Error('Cannot query `since` date using given org/repo@ref');
+    throw new Error('Cannot find given repository');
   }
-  return repository.object.history.nodes[0].committedDate;
+  try {
+    return repository.object.history.nodes[0].committedDate;
+  } catch {
+    throw new Error('Cannot query `since` date using given ref');
+  }
 }
 
 async function getCommitsSince(
