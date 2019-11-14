@@ -5,7 +5,6 @@ export interface Commit {
   messageHeadline: string;
   abbreviatedOid: string;
   committedDate: string;
-  author: { user: { login: string; name: string } };
 }
 
 interface HistoryResponse {
@@ -135,12 +134,6 @@ async function getCommitsSince(
                 messageHeadline
                 abbreviatedOid
                 committedDate
-                author {
-                  user {
-                    login
-                    name
-                  }
-                }
               }
               pageInfo {
                 endCursor
