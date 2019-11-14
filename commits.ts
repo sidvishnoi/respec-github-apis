@@ -38,22 +38,28 @@ const _persistentCachePromise = new TTLCache<string, CacheEntry>(
  * Get commits since given commitish
  * @param org repository owner/organization
  * @param repo repository name
- * @param ref commitish
+ * @param fromRef commitish
+ * @param toRef commitish
  * @example
  * ```
- * for await (const commit of getCommits('w3c', 'respec', 'HEAD~5')) {
+ * for await (const commit of getCommits('w3c', 'respec', 'HEAD~5', 'HEAD~2')) {
  *   console.log(commit);
  * }
  * ```
  */
-export async function* getCommits(org: string, repo: string, ref: string) {
+export async function* getCommits(
+  org: string,
+  repo: string,
+  fromRef: string,
+  toRef = 'HEAD',
+) {
   const cache = await _persistentCachePromise;
 
-  const cacheKey = `${org}/${repo}@${ref}`;
+  const cacheKey = `${org}/${repo}@${fromRef}..${toRef}`;
   const cached = cache.get(cacheKey);
 
   const { since, commits } = cached || {
-    since: await getSinceDate(org, repo, ref),
+    since: await getCommitDate(org, repo, fromRef),
     commits: [],
   };
 
@@ -63,7 +69,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
   const newCacheEntry = { since: '', commits };
   let cursor: string | undefined;
   do {
-    const data = await getCommitsSince(org, repo, since, cursor);
+    const data = await getCommitsSince(org, repo, since, toRef, cursor);
     yield* data.commits;
     cursor = data.cursor;
 
@@ -84,7 +90,7 @@ export async function* getCommits(org: string, repo: string, ref: string) {
   }
 }
 
-async function getSinceDate(org: string, repo: string, ref: string) {
+async function getCommitDate(org: string, repo: string, ref: string) {
   const query = `
     query($org: String!, $repo: String!, $ref: String!) {
       repository(owner: $org, name: $repo) {
@@ -117,6 +123,7 @@ async function getCommitsSince(
   org: string,
   repo: string,
   since: string,
+  toRef: string,
   cursor?: string,
 ) {
   const query = `
@@ -124,10 +131,11 @@ async function getCommitsSince(
       $org: String!
       $repo: String!
       $since: GitTimestamp!
+      $toRef: String!
       $cursor: String
     ) {
       repository(owner: $org, name: $repo) {
-        object(expression: "HEAD") {
+        object(expression: $toRef) {
           ... on Commit {
             history(since: $since, after: $cursor) {
               nodes {
@@ -146,7 +154,7 @@ async function getCommitsSince(
     }
   `;
 
-  const data = await requestData(query, { org, repo, since, cursor });
+  const data = await requestData(query, { org, repo, since, toRef, cursor });
 
   const { repository }: HistoryResponse = data;
   const { nodes: commits, pageInfo } = repository.object.history;
