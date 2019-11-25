@@ -13,7 +13,7 @@ const _persistentCachePromise = new TTLCache<string, CacheEntry>(
 ).load();
 
 interface Options {
-  /** A posix path. Passing empty string means root directory */
+  /** Pass empty string for root directory */
   path: string;
   /** Git branch */
   branch: string;
@@ -96,7 +96,8 @@ async function getLatestCommitDate(owner: string, name: string, opts: Options) {
       }
     }
   `;
-  const { path, branch } = opts;
+  let { path, branch } = opts;
+  if (path === '') path = '.';
   const variables = { owner, name, path, branch };
 
   const res = await requestData(query, variables);
