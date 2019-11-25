@@ -6,7 +6,7 @@
     "build": "tsc -d",
     "clean": "rm -rf *.js *.d.ts",
     "dev": "tsc -w",
-    "prepack": "npm run build"
+    "prepare": "npm run build"
   },
   "dependencies": {
     "node-fetch": "^2.6.0"
