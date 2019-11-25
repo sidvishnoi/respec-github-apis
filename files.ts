@@ -20,14 +20,14 @@ interface Options {
   /** Recursive traversal depth */
   depth: number;
   /** Bypass cached data and fetch files anyway */
-  bypassCache: boolean;
+  noCache: boolean;
 }
 
 const defaulOptions: Options = {
   path: '',
   branch: 'master',
   depth: 1,
-  bypassCache: false,
+  noCache: false,
 };
 
 /**
@@ -39,13 +39,18 @@ export async function getFiles(
   name: string,
   options: Partial<Options>,
 ) {
-  const cache = await _persistentCachePromise;
   const opts = { ...defaulOptions, ...options };
+
+  if (opts.noCache) {
+    return await getFilesList(owner, name, opts);
+  }
+
+  const cache = await _persistentCachePromise;
   const cacheKey = getCacheKey(owner, name, opts);
 
   // If cache has fresh data, return it.
   let cached = cache.get(cacheKey, false);
-  if (cached && !opts.bypassCache) {
+  if (cached) {
     return cached.files;
   }
 
@@ -53,7 +58,7 @@ export async function getFiles(
   // Pick from "stale" cache as there is no new commit.
   cached = cache.get(cacheKey, true);
   const lastCommitAt = await getLatestCommitDate(owner, name, opts);
-  if (cached && cached.lastCommitAt === lastCommitAt && !opts.bypassCache) {
+  if (cached && cached.lastCommitAt === lastCommitAt) {
     return cached.files;
   }
 
