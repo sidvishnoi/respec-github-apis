@@ -12,11 +12,8 @@ jobs:
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-      - run: npm i
+      - run: npm i --ignore-scripts
       - name: Build and Publish
-        run: |
-          npm run clean
-          npm run build
-          npm publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
