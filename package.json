@@ -8,6 +8,7 @@
     "dev": "tsc -w",
     "prepare": "npm run build"
   },
+  "type": "module",
   "dependencies": {
     "node-fetch": "^2.6.1"
   },
